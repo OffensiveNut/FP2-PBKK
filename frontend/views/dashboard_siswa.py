@@ -32,7 +32,7 @@ data_info_dashboard = {
 # ==========================================
 
 # --- HEADER SECTION ---
-col_logo, col_logout = st.columns([9, 1])
+col_logo, col_logout, col_button = st.columns([9, 1, 1])
 
 with col_logo:
     st.subheader("🎓 FastPresensi")
@@ -42,6 +42,11 @@ with col_logout:
         # TODO (Backend): Tambahkan logika hapus token JWT dari session di sini
         st.session_state.clear()
         st.toast("Berhasil Logout!")
+
+with col_button:
+    if st.button("Go to Admin Dashboard", use_container_width=True):
+        
+        st.switch_page("views/dashboard_admin.py")
 
 st.write("") 
 

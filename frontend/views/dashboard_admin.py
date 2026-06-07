@@ -23,6 +23,14 @@ data_info_dashboard = {
 
 st.write("") 
 st.caption("Daftar Kuliah Anda")
+#buttons to all dashboard pages e.g pages dashboard_siswa.py, dashboard_guru.py
+if st.button("Go to Siswa Dashboard", use_container_width=True):
+        st.switch_page("views/dashboard_siswa.py")
+       
+
+if st.button("Go to Guru Dashboard", use_container_width=True):
+        st.switch_page("views/dashboard_guru.py")
+       
 st.subheader(data_user['semester_aktif'])
 st.divider() 
 

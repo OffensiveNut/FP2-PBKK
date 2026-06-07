@@ -23,6 +23,9 @@ data_info_dashboard = {
 #tidak kepikiran tampilan jelasnya sementara dashboard guru hanya menampilkan tanggal dan semua list kelas yang ada
 
 st.caption("Daftar Kuliah Anda")
+if st.button("Go to Admin Dashboard", use_container_width=True):
+        st.switch_page("views/dashboard_admin.py")
+       
 st.subheader(data_user['semester_aktif'])
 st.divider() 
 
