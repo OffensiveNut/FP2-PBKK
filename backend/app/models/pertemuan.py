@@ -41,6 +41,9 @@ class Pertemuan(Base):
         Enum(JenisPertemuanEnum), nullable=False
     )
     token_presensi: Mapped[str] = mapped_column(String(10), unique=True, nullable=False)
+    token_expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
     created_by: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=False
     )
