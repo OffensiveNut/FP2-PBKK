@@ -11,5 +11,6 @@ dependencies = [
     "pydantic",
     "pydantic-settings",
     "pyjwt",
-    "passlib"
+    "passlib",
+    "email-validator>=2.3.0",
 ]
