@@ -1,12 +1,21 @@
 import uuid
+from datetime import time
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_db, require_admin
 from app.core.exceptions import NotFound
+from app.models.jadwal_kelas import JadwalKelas
+from app.models.kelas import Kelas
 from app.models.user import User
+from app.schemas.jadwal_kelas import (
+    JadwalKelasCreate,
+    JadwalKelasResponse,
+    JadwalKelasUpdate,
+)
 from app.schemas.kelas import KelasCreate, KelasResponse, KelasUpdate
 from app.services.kelas_service import (
     add_guru_to_kelas,
@@ -122,3 +131,83 @@ async def remove_siswa(
 ) -> KelasResponse:
     kelas = await remove_siswa_from_kelas(db, kelas_id, siswa_id)
     return KelasResponse.model_validate(kelas)
+
+
+@router.get("/{kelas_id}/jadwal", response_model=list[JadwalKelasResponse])
+async def list_jadwal_kelas(
+    kelas_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(require_admin),
+) -> list[JadwalKelasResponse]:
+    result = await db.execute(
+        select(JadwalKelas).where(JadwalKelas.kelas_id == kelas_id)
+    )
+    return [JadwalKelasResponse.model_validate(j) for j in result.scalars().all()]
+
+
+@router.post("/{kelas_id}/jadwal", response_model=JadwalKelasResponse, status_code=201)
+async def create_jadwal_kelas(
+    kelas_id: uuid.UUID,
+    data: JadwalKelasCreate,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(require_admin),
+) -> JadwalKelasResponse:
+    kelas = await get_kelas_by_id(db, kelas_id)
+    if not kelas:
+        raise NotFound("Kelas not found")
+
+    jadwal = JadwalKelas(
+        kelas_id=kelas_id,
+        hari=data.hari,
+        waktu_mulai=data.waktu_mulai,
+        waktu_selesai=data.waktu_selesai,
+    )
+    db.add(jadwal)
+    await db.commit()
+    await db.refresh(jadwal)
+    return JadwalKelasResponse.model_validate(jadwal)
+
+
+@router.put("/{kelas_id}/jadwal/{jadwal_id}", response_model=JadwalKelasResponse)
+async def update_jadwal_kelas(
+    kelas_id: uuid.UUID,
+    jadwal_id: uuid.UUID,
+    data: JadwalKelasUpdate,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(require_admin),
+) -> JadwalKelasResponse:
+    result = await db.execute(
+        select(JadwalKelas).where(
+            JadwalKelas.id == jadwal_id, JadwalKelas.kelas_id == kelas_id
+        )
+    )
+    jadwal = result.scalar_one_or_none()
+    if not jadwal:
+        raise NotFound("Jadwal not found")
+
+    update_data = data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(jadwal, field, value)
+
+    await db.commit()
+    await db.refresh(jadwal)
+    return JadwalKelasResponse.model_validate(jadwal)
+
+
+@router.delete("/{kelas_id}/jadwal/{jadwal_id}", status_code=204)
+async def delete_jadwal_kelas(
+    kelas_id: uuid.UUID,
+    jadwal_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(require_admin),
+) -> None:
+    result = await db.execute(
+        select(JadwalKelas).where(
+            JadwalKelas.id == jadwal_id, JadwalKelas.kelas_id == kelas_id
+        )
+    )
+    jadwal = result.scalar_one_or_none()
+    if not jadwal:
+        raise NotFound("Jadwal not found")
+    await db.delete(jadwal)
+    await db.commit()

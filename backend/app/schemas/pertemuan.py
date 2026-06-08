@@ -1,15 +1,17 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime, time
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.pertemuan import JenisPertemuanEnum
 
 
 class PertemuanBase(BaseModel):
     kelas_id: uuid.UUID
+    tanggal_pertemuan: date
+    waktu_mulai_aktual: time
+    waktu_selesai_aktual: time
     deskripsi: str
-    waktu_selesai: datetime
     jenis_pertemuan: JenisPertemuanEnum
 
 
@@ -18,17 +20,16 @@ class PertemuanCreate(PertemuanBase):
 
 
 class PertemuanUpdate(BaseModel):
-    kelas_id: uuid.UUID | None = None
+    tanggal_pertemuan: date | None = None
+    waktu_mulai_aktual: time | None = None
+    waktu_selesai_aktual: time | None = None
     deskripsi: str | None = None
-    waktu_selesai: datetime | None = None
     jenis_pertemuan: JenisPertemuanEnum | None = None
 
 
 class PertemuanResponse(PertemuanBase):
     id: uuid.UUID
     token_presensi: str
-    token_expires_at: datetime
     created_by: uuid.UUID
-    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

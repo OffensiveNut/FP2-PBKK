@@ -4,7 +4,7 @@ from logging.config import fileConfig
 from alembic import context
 from app.core.config import settings
 from app.core.database import Base
-from app.models import Izin, Kehadiran, Kelas, Pertemuan, User
+from app.models import Izin, JadwalKelas, Kehadiran, Kelas, Pertemuan, SemesterConfig, User
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config

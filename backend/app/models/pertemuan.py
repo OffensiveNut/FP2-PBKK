@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import enum
 import uuid
-from datetime import datetime
+from datetime import date, datetime, time
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, Enum, ForeignKey, String, Text
+from sqlalchemy import Date, Enum, ForeignKey, String, Text, Time
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.sql import func
 
 from app.core.database import Base
 
@@ -33,23 +32,16 @@ class Pertemuan(Base):
     kelas_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("kelas.id"), nullable=False
     )
+    tanggal_pertemuan: Mapped[date] = mapped_column(Date, nullable=False)
+    waktu_mulai_aktual: Mapped[time] = mapped_column(Time, nullable=False)
+    waktu_selesai_aktual: Mapped[time] = mapped_column(Time, nullable=False)
     deskripsi: Mapped[str] = mapped_column(Text, nullable=False)
-    waktu_selesai: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False
-    )
     jenis_pertemuan: Mapped[JenisPertemuanEnum] = mapped_column(
         Enum(JenisPertemuanEnum), nullable=False
     )
-    token_presensi: Mapped[str] = mapped_column(String(10), unique=True, nullable=False)
-    token_expires_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False
-    )
+    token_presensi: Mapped[str] = mapped_column(String(10), nullable=False)
     created_by: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=False
-    )
-
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
     )
 
     kelas: Mapped["Kelas"] = relationship("Kelas", back_populates="pertemuan")

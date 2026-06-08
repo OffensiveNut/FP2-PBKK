@@ -12,7 +12,11 @@ from app.services.user_service import get_user_by_id
 
 
 async def create_kelas(db: AsyncSession, data: KelasCreate) -> Kelas:
-    kelas = Kelas(nama_kelas=data.nama_kelas, jadwal=data.jadwal)
+    kelas = Kelas(
+        semester_id=data.semester_id,
+        nama_kelas=data.nama_kelas,
+        deskripsi=data.deskripsi,
+    )
     db.add(kelas)
     await db.commit()
     await db.refresh(kelas)
