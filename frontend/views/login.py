@@ -20,14 +20,15 @@ with st.container(border=True):
                     is_success, result = api_login(username, password)
                     
                     if is_success:
-                        # 1. Simpan token JWT dan data user ke brankas memori Streamlit
+                        if not isinstance(result, dict):
+                            st.error("Format respons tidak valid")
+                            st.stop()
+
                         st.session_state["access_token"] = result["access_token"]
                         st.session_state["user_data"] = result["user"]
-                        
+
                         st.success("✅ Login berhasil! Mengarahkan ke dashboard...")
-                        
-                        # 2. Cek Role User untuk menentukan Dashboard mana yang dibuka
-                        # Asumsi: Skema UserResponse dari Rasya memiliki atribut "role"
+
                         role = result["user"].get("role", "siswa").lower()
                         
                         if role == "admin":
