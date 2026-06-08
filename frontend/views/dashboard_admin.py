@@ -29,6 +29,9 @@ with st.sidebar:
     st.title("🎓 FastPresensi")
     st.caption("ADMIN CONSOLE")
     st.divider()
+    if st.button("🚪 Logout", use_container_width=True):
+        st.session_state.clear() # Hapus semua data login
+        st.rerun() # Refresh untuk kembali ke halaman login
     
     # Menu Navigasi Internal
     menu_selection = st.radio(
@@ -39,7 +42,7 @@ with st.sidebar:
     
     st.write("")
     st.write("")
-    st.button("➕ New Session", type="primary", use_container_width=True)
+    
 
 
 # ==========================================

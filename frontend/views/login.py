@@ -1,6 +1,7 @@
 import streamlit as st
 from utils.api_client import api_login
 
+
 st.set_page_config(page_title="Login - FastPresensi", layout="centered")
 
 with st.container(border=True):
@@ -16,28 +17,29 @@ with st.container(border=True):
                 st.warning("⚠️ Silakan isi username dan password terlebih dahulu.")
             else:
                 with st.spinner("Memeriksa kredensial..."):
-                    # Panggil fungsi penembak API
-                    is_success, result = api_login(username, password)
                     
-                    if is_success:
-                        if not isinstance(result, dict):
-                            st.error("Format respons tidak valid")
-                            st.stop()
-
-                        st.session_state["access_token"] = result["access_token"]
-                        st.session_state["user_data"] = result["user"]
-
-                        st.success("✅ Login berhasil! Mengarahkan ke dashboard...")
-
-                        role = result["user"].get("role", "siswa").lower()
+                    # ==========================================
+                    # T🚀  BYPASS LOGIN
+                    # ==========================================
+                    uname_lower = username.lower()
+                    if uname_lower in ["admin", "guru", "siswa"]:
+                        # Langsung buat sesi palsu tanpa nembak API
+                        st.session_state["access_token"] = "token_palsu_untuk_ui_testing"
+                        st.session_state["user_data"] = {"role": uname_lower.upper()}
                         
-                        if role == "admin":
-                            st.switch_page("views/dashboard_admin.py")
-                        elif role == "guru":
-                            st.switch_page("views/dashboard_guru.py")
-                        else:
-                            st.switch_page("views/dashboard_siswa.py")
-                            
+                        st.success(f"✅ Bypass mode: Masuk sebagai {uname_lower.upper()}...")
+                        st.rerun()
+                        
+                    # ==========================================
+                    # 🔒 REAL CODE LOGIC
+                    # ==========================================
                     else:
-                        # Tampilkan pesan error dari backend jika gagal
-                        st.error(f"❌ {result}")
+                        is_success, result = api_login(username, password)
+                        
+                        if is_success:
+                            st.session_state["access_token"] = result["access_token"]
+                            st.session_state["user_data"] = result["user"]
+                            st.success("✅ Login berhasil! Mengarahkan ke dashboard...")
+                            st.rerun()
+                        else:
+                            st.error(f"❌ {result}")
