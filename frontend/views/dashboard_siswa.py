@@ -95,7 +95,7 @@ def render_detail_kelas(kelas):
     st.divider()
     
     # Form Upload Izin
-    with st.expander("📄 Ajukan Izin Susulan / Pra-Izin"):
+    with st.expander("📄 Ajukan Izin "):
         with st.form(f"form_izin_riwayat_{kelas['kode']}", border=False):
             alasan_izin = st.text_area("Keterangan/Alasan")
             file_bukti = st.file_uploader("Upload Surat Keterangan", type=["pdf", "jpg", "png"])
