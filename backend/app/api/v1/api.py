@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import auth, izin, kehadiran, kelas, semester_config, users
+from app.api.v1.endpoints import auth, izin, kehadiran, kelas, pertemuan, semester_config, users
 
 router = APIRouter()
 
@@ -12,3 +12,4 @@ router.include_router(izin.router, prefix="/izin", tags=["izin"])
 router.include_router(
     semester_config.router, prefix="/semester", tags=["semester"]
 )
+router.include_router(pertemuan.router, prefix="/pertemuan", tags=["pertemuan"])

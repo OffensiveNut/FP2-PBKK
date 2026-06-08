@@ -34,3 +34,9 @@ class PertemuanResponse(PertemuanBase):
     created_by: uuid.UUID
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class PertemuanGenerateResponse(BaseModel):
+    kelas_id: uuid.UUID
+    jumlah_pertemuan: int
+    pertemuan: list[PertemuanResponse]
