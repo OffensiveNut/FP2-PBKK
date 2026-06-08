@@ -206,6 +206,65 @@ if menu_selection == "Attendance":
                         st.rerun()
 
 else:
-    # --- SETTINGS PAGE ---
-    st.subheader("Settings")
-    st.info("Halaman **Settings** sedang dalam tahap pengembangan.")
+     # ==========================================
+    # --- HALAMAN SETTINGS (Sama untuk semua role) ---
+    # ==========================================
+    st.subheader("⚙️ Account Settings")
+    st.caption("Kelola informasi profil, email, dan keamanan akun Anda.")
+    st.divider()
+
+    # Data Dummy User (Bisa dihubungkan dengan st.session_state["user_data"] nantinya)
+    dummy_profile = {
+        "full_name": "Jovan Oberto Mishael Sinaga",
+        "username": "jovanoberto",
+        "email": "jovan@fastpresensi.edu",
+        "phone": "+62 812-3456-7890",
+        "role": "SISWA" # Akan dinamis tergantung siapa yang login
+    }
+
+    # Membagi layout menjadi dua kolom utama
+    col_profile, col_security = st.columns([1.2, 1])
+
+    # --- KOLOM KIRI: EDIT PROFIL ---
+    with col_profile:
+        st.markdown("**👤 Informasi Profil**")
+        with st.container(border=True):
+            # Gunakan st.form agar halaman tidak refresh setiap kali mengetik satu huruf
+            with st.form("form_edit_profile", border=False):
+                # Field Role dibuat disabled karena user tidak boleh ganti role sendiri
+                st.text_input("Role Akun", value=dummy_profile["role"], disabled=True)
+                
+                st.text_input("Nama Lengkap", value=dummy_profile["full_name"])
+                st.text_input("Username", value=dummy_profile["username"])
+                
+                c_email, c_phone = st.columns(2)
+                with c_email:
+                    st.text_input("Email", value=dummy_profile["email"])
+                with c_phone:
+                    st.text_input("Nomor Telepon", value=dummy_profile["phone"])
+                
+                st.write("")
+                submit_profile = st.form_submit_button("Simpan Perubahan Profil", type="primary")
+                
+                if submit_profile:
+                    # TODO: Panggil API PUT /user/profile di sini
+                    st.success("✅ Informasi profil berhasil diperbarui!")
+
+    # --- KOLOM KANAN: SECURITY & PREFERENCES ---
+    with col_security:
+        st.markdown("**🔒 Keamanan (Ganti Password)**")
+        with st.container(border=True):
+            with st.form("form_edit_password", border=False):
+                st.text_input("Password Saat Ini", type="password", placeholder="Masukkan password lama...")
+                st.text_input("Password Baru", type="password", placeholder="Minimal 8 karakter")
+                st.text_input("Konfirmasi Password Baru", type="password")
+                
+                st.write("")
+                submit_password = st.form_submit_button("Update Password", type="primary")
+                
+                if submit_password:
+                    # TODO: Panggil API PUT /user/password di sini
+                    st.success("✅ Password berhasil diubah!")
+        
+        st.write("")
+       
