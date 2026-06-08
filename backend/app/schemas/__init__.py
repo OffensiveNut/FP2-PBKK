@@ -4,10 +4,10 @@ from .kehadiran import KehadiranBase, KehadiranCreate, KehadiranUpdate, Kehadira
 from .kelas import KelasBase, KelasCreate, KelasUpdate, KelasResponse
 from .pertemuan import PertemuanBase, PertemuanCreate, PertemuanUpdate, PertemuanResponse
 from .semester_config import SemesterConfigBase, SemesterConfigCreate, SemesterConfigUpdate, SemesterConfigResponse
-from .user import UserBase, UserCreate, UserUpdate, UserResponse
+from .user import UserBase, UserCreate, UserCreateResponse, UserUpdate, UserResponse
 
 __all__ = [
-    "UserBase", "UserCreate", "UserUpdate", "UserResponse",
+    "UserBase", "UserCreate", "UserCreateResponse", "UserUpdate", "UserResponse",
     "KelasBase", "KelasCreate", "KelasUpdate", "KelasResponse",
     "JadwalKelasBase", "JadwalKelasCreate", "JadwalKelasUpdate", "JadwalKelasResponse",
     "PertemuanBase", "PertemuanCreate", "PertemuanUpdate", "PertemuanResponse",
