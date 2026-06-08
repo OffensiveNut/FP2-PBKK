@@ -9,7 +9,7 @@ Tutorial on how to run the frontend:
     ```
 3. Run the Streamlit app:
     ```
-    streamlit run app.py
+    streamlit run main.py
     ```
     
 ```
