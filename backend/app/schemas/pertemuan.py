@@ -30,6 +30,7 @@ class PertemuanUpdate(BaseModel):
 class PertemuanResponse(PertemuanBase):
     id: uuid.UUID
     token_presensi: str
+    token_expires_at: datetime
     created_by: uuid.UUID
 
     model_config = ConfigDict(from_attributes=True)

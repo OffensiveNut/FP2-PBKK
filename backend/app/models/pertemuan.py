@@ -5,8 +5,9 @@ import uuid
 from datetime import date, datetime, time
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Date, Enum, ForeignKey, String, Text, Time
+from sqlalchemy import DateTime, Date, Enum, ForeignKey, String, Text, Time
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.sql import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -40,6 +41,9 @@ class Pertemuan(Base):
         Enum(JenisPertemuanEnum), nullable=False
     )
     token_presensi: Mapped[str] = mapped_column(String(10), nullable=False)
+    token_expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
     created_by: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=False
     )
