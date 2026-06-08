@@ -14,7 +14,7 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    password: str = Field(..., min_length=8, max_length=255)
+    password: str | None = Field(None, min_length=8, max_length=255)
 
 
 class UserUpdate(BaseModel):
@@ -31,3 +31,7 @@ class UserResponse(UserBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserCreateResponse(UserResponse):
+    generated_password: str | None = None

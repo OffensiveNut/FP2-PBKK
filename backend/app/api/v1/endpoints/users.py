@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_db, get_current_user, require_admin
 from app.core.exceptions import NotFound
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from app.schemas.user import UserCreate, UserCreateResponse, UserResponse, UserUpdate
 from app.services.user_service import (
     bulk_create_users,
     create_user,
@@ -47,14 +47,17 @@ async def get_user(
     return UserResponse.model_validate(user)
 
 
-@router.post("/", response_model=UserResponse, status_code=201)
+@router.post("/", response_model=UserCreateResponse, status_code=201)
 async def create_user_endpoint(
     data: UserCreate,
     db: AsyncSession = Depends(get_db),
     _: User = Depends(require_admin),
-) -> UserResponse:
-    user = await create_user(db, data)
-    return UserResponse.model_validate(user)
+) -> UserCreateResponse:
+    user, generated_password = await create_user(db, data)
+    return UserCreateResponse(
+        **UserResponse.model_validate(user).model_dump(),
+        generated_password=generated_password,
+    )
 
 
 @router.put("/{user_id}", response_model=UserResponse)
