@@ -1,0 +1,7 @@
+username,email,password,role,nama_lengkap
+budi.guru,budi@sekolah.id,guru123,GURU,Budi Santoso
+siti.guru,siti@sekolah.id,guru456,GURU,Siti Rahmawati
+andi.siswa,andi@sekolah.id,siswa123,SISWA,Andi Pratama
+rina.siswa,rina@sekolah.id,siswa456,SISWA,Rina Wijaya
+doni.siswa,doni@sekolah.id,siswa789,SISWA,Doni Saputra
+dea.siswa,dea@sekolah.id,siswa000,SISWA,Dea Afriyana
