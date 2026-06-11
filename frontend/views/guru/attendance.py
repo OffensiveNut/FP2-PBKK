@@ -51,7 +51,11 @@ def render_detail_kelas(k: dict):
                 st.rerun()
         st.stop()
 
-    p = pertemuan_list[-1]
+    sel_key = f"selected_pertemuan_{k['id']}"
+    pertemuan_labels = {f"{p['tanggal_pertemuan']} — {p.get('jenis_pertemuan', '')}": p for p in pertemuan_list}
+    selected_label = st.selectbox("Pilih Pertemuan", list(pertemuan_labels.keys()),
+                                  index=len(pertemuan_list) - 1, key=sel_key)
+    p = pertemuan_labels[selected_label]
     ok_h, hadir_list = api_request("GET", f"/kehadiran/pertemuan/{p['id']}")
 
     siswa_map = get_siswa_dict(k["id"])
