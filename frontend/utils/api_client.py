@@ -71,6 +71,22 @@ def api_login(username: str, password: str) -> tuple[bool, Any]:
         return False, str(e)
 
 
+def api_download_text(path: str) -> str | None:
+    url = f"{BASE_URL}{path}"
+    headers = {}
+    token = st.session_state.get("access_token")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    try:
+        resp = requests.get(url, headers=headers, timeout=10)
+        if resp.status_code == 200:
+            return resp.text
+    except Exception:
+        return None
+    return None
+
+
 def api_upload(method: str, path: str, file: Any, data: dict | None = None) -> tuple[bool, Any]:
     url = f"{BASE_URL}{path}"
     headers = {}

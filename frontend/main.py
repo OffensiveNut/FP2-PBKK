@@ -1,26 +1,35 @@
 import streamlit as st
 
-# 1. Definisikan semua halaman
-login_page = st.Page("views/login.py", title="Login", icon="🔑")
-siswa_page = st.Page("views/dashboard_siswa.py", title="Dashboard Siswa", icon="🎓")
-guru_page  = st.Page("views/dashboard_guru.py", title="Dashboard Guru", icon="👨‍🏫")
-admin_page = st.Page("views/dashboard_admin.py", title="Dashboard Admin", icon="⚙️")
+st.set_page_config(page_title="FastPresensi", layout="wide")
 
-# 2. Logika Routing Berdasarkan Session State
+login_page = st.Page("views/login.py", title="Login", icon="🔑")
+settings_page = st.Page("views/settings.py", title="Settings", icon="⚙️")
+
+admin_pages = [
+    st.Page("views/admin/classes.py", title="Classes", icon="📚"),
+    st.Page("views/admin/users.py", title="Users", icon="👥"),
+    settings_page,
+]
+
+guru_pages = [
+    st.Page("views/guru/attendance.py", title="Attendance", icon="📋"),
+    settings_page,
+]
+
+siswa_pages = [
+    st.Page("views/siswa/attendance.py", title="Attendance", icon="📋"),
+    settings_page,
+]
+
 if "access_token" not in st.session_state:
-    # Jika belum login, HANYA muat halaman login.
-    # position="hidden" akan menghilangkan menu default bawaan Streamlit.
     pg = st.navigation([login_page], position="hidden")
 else:
-    # Jika sudah login, ambil role dari user_data (Amankan dengan .upper() agar tidak case-sensitive)
-    role = st.session_state.get("user_data", {}).get("role", "SISWA").upper()
-    
+    role = st.session_state.get("user_data", {}).get("role", "").upper()
     if role == "ADMIN":
-        pg = st.navigation([admin_page], position="hidden")
+        pg = st.navigation(admin_pages)
     elif role == "GURU":
-        pg = st.navigation([guru_page], position="hidden")
+        pg = st.navigation(guru_pages)
     else:
-        pg = st.navigation([siswa_page], position="hidden")
+        pg = st.navigation(siswa_pages)
 
-# 3. Eksekusi Halaman
 pg.run()
