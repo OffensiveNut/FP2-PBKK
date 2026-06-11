@@ -168,7 +168,31 @@ for k in (kelas_list or []):
             success, jadwal_list = api_request("GET", f"/kelas/{k['id']}/jadwal")
             if success and jadwal_list:
                 for j in jadwal_list:
-                    st.write(f"{j['hari']} {j['waktu_mulai']} — {j['waktu_selesai']}")
+                    cols = st.columns([2, 1, 1])
+                    cols[0].write(f"{j['hari']} {j['waktu_mulai']} — {j['waktu_selesai']}")
+                    edit_key = f"jadwal_edit_{j['id']}"
+                    if cols[1].button("✏️", key=f"edit_{j['id']}"):
+                        st.session_state[edit_key] = not st.session_state.get(edit_key, False)
+                    if cols[2].button("🗑️", key=f"del_{j['id']}"):
+                        api_request("DELETE", f"/kelas/{k['id']}/jadwal/{j['id']}")
+                        st.rerun()
+                    if st.session_state.get(edit_key):
+                        with st.form(key=f"jadwal_edit_form_{j['id']}", border=True):
+                            cur_hari = st.selectbox("Hari", ["SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU", "MINGGU"],
+                                                    index=["SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU", "MINGGU"].index(j['hari']),
+                                                    key=f"ehari_{j['id']}")
+                            cur_mulai = st.time_input("Waktu Mulai", key=f"emulai_{j['id']}")
+                            cur_selesai = st.time_input("Waktu Selesai", key=f"eselesai_{j['id']}")
+                            ec1, ec2 = st.columns(2)
+                            if ec1.form_submit_button("💾 Simpan", type="primary", use_container_width=True):
+                                api_request("PUT", f"/kelas/{k['id']}/jadwal/{j['id']}", json={
+                                    "hari": cur_hari, "waktu_mulai": str(cur_mulai), "waktu_selesai": str(cur_selesai),
+                                })
+                                st.session_state[edit_key] = False
+                                st.rerun()
+                            if ec2.form_submit_button("Batal", use_container_width=True):
+                                st.session_state[edit_key] = False
+                                st.rerun()
             with st.form(key=f"jadwal_form_{k['id']}", border=False):
                 hari = st.selectbox("Hari", ["SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU", "MINGGU"], key=f"hari_{k['id']}")
                 mulai = st.time_input("Waktu Mulai", key=f"mulai_{k['id']}")
