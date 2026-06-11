@@ -28,10 +28,11 @@ async def get_me(current_user: User = Depends(get_current_user)) -> UserResponse
 async def list_users(
     skip: int = 0,
     limit: int = 100,
+    role: str | None = None,
     db: AsyncSession = Depends(get_db),
     _: User = Depends(require_admin),
 ) -> list[UserResponse]:
-    users = await get_users(db, skip=skip, limit=limit)
+    users = await get_users(db, skip=skip, limit=limit, role=role)
     return [UserResponse.model_validate(u) for u in users]
 
 

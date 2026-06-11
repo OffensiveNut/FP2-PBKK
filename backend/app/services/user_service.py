@@ -73,11 +73,12 @@ async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
 
 
 async def get_users(
-    db: AsyncSession, skip: int = 0, limit: int = 100
+    db: AsyncSession, skip: int = 0, limit: int = 100, role: str | None = None
 ) -> list[User]:
-    result = await db.execute(
-        select(User).offset(skip).limit(limit)
-    )
+    q = select(User)
+    if role:
+        q = q.where(User.role == role)
+    result = await db.execute(q.offset(skip).limit(limit))
     return list(result.scalars().all())
 
 
