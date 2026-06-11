@@ -91,10 +91,9 @@ Gunakan kredensial ini untuk login dan membuat user lain (guru/siswa).
 | Method | Endpoint | Auth | Deskripsi |
 |---|---|---|---|
 | POST | `/api/v1/auth/login` | Public | Login, mengembalikan JWT |
-| POST | `/api/v1/auth/register` | Admin | Register user baru |
 | GET | `/api/v1/users/me` | Any | Profil user saat ini |
-| GET | `/api/v1/users/` | Admin | Daftar semua user |
-| POST | `/api/v1/users/` | Admin | Buat user baru |
+| GET | `/api/v1/users/` | Admin | Daftar semua user (`?role=GURU`/`SISWA`) |
+| POST | `/api/v1/users/` | Admin | Buat user baru (password opsional → auto-generate) |
 | GET | `/api/v1/users/{id}` | Admin | Detail user |
 | PUT | `/api/v1/users/{id}` | Admin | Update user |
 | DELETE | `/api/v1/users/{id}` | Admin | Hapus user |
@@ -104,9 +103,9 @@ Gunakan kredensial ini untuk login dan membuat user lain (guru/siswa).
 
 | Method | Endpoint | Auth | Deskripsi |
 |---|---|---|---|
-| GET | `/api/v1/semester/` | Admin | Daftar semester |
+| GET | `/api/v1/semester/` | Any | Daftar semester |
 | POST | `/api/v1/semester/` | Admin | Buat semester baru |
-| GET | `/api/v1/semester/{id}` | Admin | Detail semester |
+| GET | `/api/v1/semester/{id}` | Any | Detail semester |
 | PUT | `/api/v1/semester/{id}` | Admin | Update semester |
 | DELETE | `/api/v1/semester/{id}` | Admin | Hapus semester |
 
@@ -114,16 +113,16 @@ Gunakan kredensial ini untuk login dan membuat user lain (guru/siswa).
 
 | Method | Endpoint | Auth | Deskripsi |
 |---|---|---|---|
-| GET | `/api/v1/kelas/` | Admin | Daftar kelas |
+| GET | `/api/v1/kelas/` | Any | Daftar kelas |
 | POST | `/api/v1/kelas/` | Admin | Buat kelas baru |
-| GET | `/api/v1/kelas/{id}` | Admin | Detail kelas |
+| GET | `/api/v1/kelas/{id}` | Any | Detail kelas (gurus + siswas) |
 | PUT | `/api/v1/kelas/{id}` | Admin | Update kelas |
 | DELETE | `/api/v1/kelas/{id}` | Admin | Hapus kelas |
 | POST | `/api/v1/kelas/{id}/guru` | Admin | Tambah guru ke kelas |
 | DELETE | `/api/v1/kelas/{id}/guru/{guru_id}` | Admin | Hapus guru dari kelas |
 | POST | `/api/v1/kelas/{id}/siswa` | Admin | Tambah siswa ke kelas |
 | DELETE | `/api/v1/kelas/{id}/siswa/{siswa_id}` | Admin | Hapus siswa dari kelas |
-| GET | `/api/v1/kelas/{id}/jadwal` | Admin | Jadwal kelas |
+| GET | `/api/v1/kelas/{id}/jadwal` | Any | Jadwal kelas |
 | POST | `/api/v1/kelas/{id}/jadwal` | Admin | Tambah jadwal kelas |
 | PUT | `/api/v1/kelas/{id}/jadwal/{jadwal_id}` | Admin | Update jadwal |
 | DELETE | `/api/v1/kelas/{id}/jadwal/{jadwal_id}` | Admin | Hapus jadwal |
@@ -133,6 +132,7 @@ Gunakan kredensial ini untuk login dan membuat user lain (guru/siswa).
 | Method | Endpoint | Auth | Deskripsi |
 |---|---|---|---|
 | POST | `/api/v1/pertemuan/generate/{kelas_id}` | Guru/Admin | Generate pertemuan dari jadwal × semester |
+| POST | `/api/v1/pertemuan/{kelas_id}/generate-token` | Guru/Admin | Buat pertemuan hari ini + token (`jenis_pertemuan`, `waktu_selesai`) |
 | GET | `/api/v1/pertemuan/kelas/{kelas_id}` | Any | Daftar pertemuan per kelas |
 | GET | `/api/v1/pertemuan/{id}` | Any | Detail pertemuan |
 | PUT | `/api/v1/pertemuan/{id}` | Guru/Admin | Update pertemuan |
@@ -144,7 +144,7 @@ Gunakan kredensial ini untuk login dan membuat user lain (guru/siswa).
 | Method | Endpoint | Auth | Deskripsi |
 |---|---|---|---|
 | POST | `/api/v1/kehadiran/token` | Siswa | Presensi via token |
-| POST | `/api/v1/kehadiran/manual` | Guru/Admin | Presensi manual |
+| POST | `/api/v1/kehadiran/manual` | Guru/Admin | Presensi manual (upsert) |
 | GET | `/api/v1/kehadiran/pertemuan/{pertemuan_id}` | Guru/Admin | Daftar presensi per pertemuan |
 | GET | `/api/v1/kehadiran/siswa/{siswa_id}` | Siswa (sendiri) / Guru/Admin | Riwayat presensi siswa |
 | GET | `/api/v1/kehadiran/export/pertemuan/{pertemuan_id}` | Guru/Admin | Download CSV rekap per pertemuan |
@@ -158,8 +158,8 @@ Gunakan kredensial ini untuk login dan membuat user lain (guru/siswa).
 | POST | `/api/v1/izin/upload` | Siswa | Upload bukti izin |
 | GET | `/api/v1/izin/` | Guru/Admin | Daftar izin |
 | GET | `/api/v1/izin/{id}` | Any | Detail izin |
-| POST | `/api/v1/izin/{id}/approve` | Guru/Admin | Setujui izin |
-| POST | `/api/v1/izin/{id}/reject` | Guru/Admin | Tolak izin |
+| PUT | `/api/v1/izin/{id}/approve` | Guru/Admin | Setujui izin |
+| PUT | `/api/v1/izin/{id}/reject` | Guru/Admin | Tolak izin |
 
 ## Database Schema
 
@@ -197,15 +197,13 @@ FP2-PBKK/
 │   │   ├── models/               # SQLAlchemy models (7 entity + 2 junction)
 │   │   ├── schemas/              # Pydantic schemas
 │   │   ├── services/             # Business logic
-│   │   ├── utils/                # Utilities
-│   │   │   └── csv_exporter.py
+│   │   ├── utils/                # Utilities (csv_exporter, email_service, file_service)
 │   │   └── main.py               # Entry point FastAPI
 │   └── pyproject.toml
 ├── frontend/
-│   ├── components/               # UI components
 │   ├── utils/                    # API client, state
-│   ├── views/                    # Halaman (login, dashboard)
-│   ├── main.py                   # Entry point Streamlit
+│   ├── views/                    # Halaman (login, settings, admin/, guru/, siswa/)
+│   ├── main.py                   # Entry point Streamlit (RBAC navigation)
 │   └── pyproject.toml
 └── pyproject.toml                # Workspace root
 ```
