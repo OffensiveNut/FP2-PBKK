@@ -3,6 +3,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.user import UserResponse
+
 
 class KelasBase(BaseModel):
     semester_id: uuid.UUID
@@ -24,5 +26,7 @@ class KelasResponse(KelasBase):
     id: uuid.UUID
     created_at: datetime
     updated_at: datetime
+    gurus: list[UserResponse] = []
+    siswas: list[UserResponse] = []
 
     model_config = ConfigDict(from_attributes=True)

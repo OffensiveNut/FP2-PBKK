@@ -99,37 +99,67 @@ if st.session_state.get("show_add_kelas"):
 
 for k in (kelas_list or []):
     with st.expander(f"**{k['nama_kelas']}**"):
+        okd, detail = api_request("GET", f"/kelas/{k['id']}")
+        gurus = detail.get("gurus", []) if okd else []
+        siswas = detail.get("siswas", []) if okd else []
+
         c1, c2 = st.columns(2)
         c1.write(f"Deskripsi: {k.get('deskripsi', '-')}")
         with c2:
             if st.button("🗑️ Hapus", key=f"del_kelas_{k['id']}"):
-                ok, _ = api_request("DELETE", f"/kelas/{k['id']}")
-                if ok:
-                    st.success("Kelas dihapus")
-                    st.rerun()
+                api_request("DELETE", f"/kelas/{k['id']}")
+                st.rerun()
 
         # ── Atur Guru ──
         with st.container(border=True):
-            st.markdown("**👨‍🏫 Atur Guru**")
-            success, guru_list = api_request("GET", "/users/", params={"role": "GURU"})
-            if success and guru_list:
-                selected = st.selectbox("Tambah Guru", guru_list, format_func=lambda g: f"{g['nama_lengkap']} ({g['username']})", key=f"guru_sel_{k['id']}")
-                if st.button("Tambah", key=f"guru_add_{k['id']}"):
-                    ok, _ = api_request("POST", f"/kelas/{k['id']}/guru", json={"user_id": selected["id"]})
-                    if ok:
-                        st.success("Guru ditambahkan")
+            guru_ids = {g["id"] for g in gurus}
+            st.markdown(f"**👨‍🏫 Guru ({len(gurus)})**")
+            for g in gurus:
+                cols = st.columns([3, 1])
+                cols[0].write(f"{g['nama_lengkap']} ({g['username']})")
+                if cols[1].button("🗑️", key=f"guru_rm_{k['id']}_{g['id']}"):
+                    api_request("DELETE", f"/kelas/{k['id']}/guru/{g['id']}")
+                    st.rerun()
+
+            if st.button("➕ Tambah Guru", key=f"guru_tmbh_{k['id']}"):
+                key = f"show_guru_add_{k['id']}"
+                st.session_state[key] = not st.session_state.get(key, False)
+
+            if st.session_state.get(f"show_guru_add_{k['id']}"):
+                all_ok, all_gurus = api_request("GET", "/users/", params={"role": "GURU"})
+                if all_ok and all_gurus:
+                    available = [g for g in all_gurus if g["id"] not in guru_ids]
+                    names = {f"{g['nama_lengkap']} ({g['username']})": g["id"] for g in available}
+                    selected = st.multiselect("Pilih Guru", list(names.keys()), key=f"guru_sel_{k['id']}")
+                    if st.button("✅ Konfirmasi", key=f"guru_confirm_{k['id']}"):
+                        for name in selected:
+                            api_request("POST", f"/kelas/{k['id']}/guru", json={"user_id": names[name]})
                         st.rerun()
 
         # ── Atur Siswa ──
         with st.container(border=True):
-            st.markdown("**👨‍🎓 Atur Siswa**")
-            success, siswa_list = api_request("GET", "/users/", params={"role": "SISWA"})
-            if success and siswa_list:
-                selected = st.selectbox("Tambah Siswa", siswa_list, format_func=lambda s: f"{s['nama_lengkap']} ({s['username']})", key=f"siswa_sel_{k['id']}")
-                if st.button("Tambah", key=f"siswa_add_{k['id']}"):
-                    ok, _ = api_request("POST", f"/kelas/{k['id']}/siswa", json={"user_id": selected["id"]})
-                    if ok:
-                        st.success("Siswa ditambahkan")
+            siswa_ids = {s["id"] for s in siswas}
+            st.markdown(f"**👨‍🎓 Siswa ({len(siswas)})**")
+            for s in siswas:
+                cols = st.columns([3, 1])
+                cols[0].write(f"{s['nama_lengkap']} ({s['username']})")
+                if cols[1].button("🗑️", key=f"siswa_rm_{k['id']}_{s['id']}"):
+                    api_request("DELETE", f"/kelas/{k['id']}/siswa/{s['id']}")
+                    st.rerun()
+
+            if st.button("➕ Tambah Siswa", key=f"siswa_tmbh_{k['id']}"):
+                key = f"show_siswa_add_{k['id']}"
+                st.session_state[key] = not st.session_state.get(key, False)
+
+            if st.session_state.get(f"show_siswa_add_{k['id']}"):
+                all_ok, all_siswa = api_request("GET", "/users/", params={"role": "SISWA"})
+                if all_ok and all_siswa:
+                    available = [s for s in all_siswa if s["id"] not in siswa_ids]
+                    names = {f"{s['nama_lengkap']} ({s['username']})": s["id"] for s in available}
+                    selected = st.multiselect("Pilih Siswa", list(names.keys()), key=f"siswa_sel_{k['id']}")
+                    if st.button("✅ Konfirmasi", key=f"siswa_confirm_{k['id']}"):
+                        for name in selected:
+                            api_request("POST", f"/kelas/{k['id']}/siswa", json={"user_id": names[name]})
                         st.rerun()
 
         # ── Atur Jadwal ──

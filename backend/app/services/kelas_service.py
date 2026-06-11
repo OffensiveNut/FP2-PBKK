@@ -20,6 +20,8 @@ async def create_kelas(db: AsyncSession, data: KelasCreate) -> Kelas:
     db.add(kelas)
     await db.commit()
     await db.refresh(kelas)
+    kelas.gurus = []
+    kelas.siswas = []
     return kelas
 
 
@@ -35,7 +37,11 @@ async def get_kelas_by_id(db: AsyncSession, kelas_id: uuid.UUID) -> Kelas | None
 async def get_kelas_list(
     db: AsyncSession, skip: int = 0, limit: int = 100
 ) -> list[Kelas]:
-    result = await db.execute(select(Kelas).offset(skip).limit(limit))
+    result = await db.execute(
+        select(Kelas)
+        .options(selectinload(Kelas.gurus), selectinload(Kelas.siswas))
+        .offset(skip).limit(limit)
+    )
     return list(result.scalars().all())
 
 
