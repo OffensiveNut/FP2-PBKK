@@ -181,12 +181,12 @@ for k in (kelas_list or []):
                             cur_hari = st.selectbox("Hari", ["SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU", "MINGGU"],
                                                     index=["SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU", "MINGGU"].index(j['hari']),
                                                     key=f"ehari_{j['id']}")
-                            cur_mulai = st.time_input("Waktu Mulai", key=f"emulai_{j['id']}")
-                            cur_selesai = st.time_input("Waktu Selesai", key=f"eselesai_{j['id']}")
+                            cur_mulai = st.text_input("Waktu Mulai", value=j['waktu_mulai'][:5], key=f"emulai_{j['id']}")
+                            cur_selesai = st.text_input("Waktu Selesai", value=j['waktu_selesai'][:5], key=f"eselesai_{j['id']}")
                             ec1, ec2 = st.columns(2)
                             if ec1.form_submit_button("💾 Simpan", type="primary", use_container_width=True):
                                 api_request("PUT", f"/kelas/{k['id']}/jadwal/{j['id']}", json={
-                                    "hari": cur_hari, "waktu_mulai": str(cur_mulai), "waktu_selesai": str(cur_selesai),
+                                    "hari": cur_hari, "waktu_mulai": f"{cur_mulai}:00", "waktu_selesai": f"{cur_selesai}:00",
                                 })
                                 st.session_state[edit_key] = False
                                 st.rerun()
@@ -195,11 +195,11 @@ for k in (kelas_list or []):
                                 st.rerun()
             with st.form(key=f"jadwal_form_{k['id']}", border=False):
                 hari = st.selectbox("Hari", ["SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU", "MINGGU"], key=f"hari_{k['id']}")
-                mulai = st.time_input("Waktu Mulai", key=f"mulai_{k['id']}")
-                selesai = st.time_input("Waktu Selesai", key=f"selesai_{k['id']}")
+                mulai = st.text_input("Waktu Mulai", placeholder="07:30", key=f"mulai_{k['id']}")
+                selesai = st.text_input("Waktu Selesai", placeholder="09:30", key=f"selesai_{k['id']}")
                 if st.form_submit_button("Tambah Jadwal"):
                     ok, _ = api_request("POST", f"/kelas/{k['id']}/jadwal", json={
-                        "hari": hari, "waktu_mulai": str(mulai), "waktu_selesai": str(selesai),
+                        "hari": hari, "waktu_mulai": f"{mulai}:00", "waktu_selesai": f"{selesai}:00",
                     })
                     if ok:
                         st.success("Jadwal ditambahkan")
