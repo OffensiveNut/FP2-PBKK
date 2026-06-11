@@ -69,6 +69,10 @@ if not success:
     st.warning(kelas_list)
     st.stop()
 
+sems_ok, semesters = api_request("GET", "/semester/")
+semester_options = {s["nama_semester"]: s["id"] for s in (semesters or [])}
+semester_names = list(semester_options.keys()) if sems_ok else []
+
 c_search, c_add = st.columns([3, 1])
 with c_add:
     if st.button("➕ Tambah Kelas", type="primary", use_container_width=True):
@@ -78,9 +82,15 @@ if st.session_state.get("show_add_kelas"):
     with st.form("form_kelas", border=True):
         nama = st.text_input("Nama Kelas")
         deskripsi = st.text_area("Deskripsi")
-        if st.form_submit_button("Simpan"):
+        if semester_names:
+            sem_nama = st.selectbox("Semester", semester_names)
+            sem_id = semester_options[sem_nama]
+        else:
+            st.warning("Buat semester terlebih dahulu")
+            sem_id = None
+        if st.form_submit_button("Simpan", disabled=not bool(sem_id)):
             ok, _ = api_request("POST", "/kelas/", json={
-                "nama_kelas": nama, "deskripsi": deskripsi,
+                "nama_kelas": nama, "deskripsi": deskripsi, "semester_id": str(sem_id),
             })
             if ok:
                 st.success("Kelas dibuat")
