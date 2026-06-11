@@ -114,7 +114,20 @@ async def mark_kehadiran_manual(
         raise NotFound("Pertemuan tidak ditemukan")
 
     await _check_siswa_in_kelas(db, siswa_id, pertemuan.kelas_id)
-    await _check_duplicate_kehadiran(db, pertemuan_id, siswa_id)
+
+    result = await db.execute(
+        select(Kehadiran).where(
+            Kehadiran.pertemuan_id == pertemuan_id,
+            Kehadiran.siswa_id == siswa_id,
+        )
+    )
+    existing = result.scalar_one_or_none()
+    if existing:
+        existing.status_hadir = status_hadir
+        existing.metode_presensi = MetodePresensiEnum.MANUAL
+        await db.commit()
+        await db.refresh(existing)
+        return existing
 
     kehadiran = Kehadiran(
         pertemuan_id=pertemuan_id,

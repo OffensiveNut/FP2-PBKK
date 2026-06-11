@@ -106,17 +106,16 @@ def render_detail_kelas(k: dict):
         cols[2].write(f"**{existing['status_hadir']}**" if existing else "**—**")
         with cols[3]:
             b1, b2, b3, b4 = st.columns(4)
-            disabled = existing is not None
-            if b1.button("H", key=f"H_{sid}_{p['id']}", help="Hadir", disabled=disabled, use_container_width=True):
+            if b1.button("H", key=f"H_{sid}_{p['id']}", help="Hadir", use_container_width=True):
                 api_request("POST", "/kehadiran/manual", json={"pertemuan_id": str(p["id"]), "siswa_id": sid, "status_hadir": "HADIR"})
                 st.rerun()
-            if b2.button("I", key=f"I_{sid}_{p['id']}", help="Izin", disabled=disabled, use_container_width=True):
+            if b2.button("I", key=f"I_{sid}_{p['id']}", help="Izin", use_container_width=True):
                 api_request("POST", "/kehadiran/manual", json={"pertemuan_id": str(p["id"]), "siswa_id": sid, "status_hadir": "IZIN"})
                 st.rerun()
-            if b3.button("S", key=f"S_{sid}_{p['id']}", help="Sakit", disabled=disabled, use_container_width=True):
+            if b3.button("S", key=f"S_{sid}_{p['id']}", help="Sakit", use_container_width=True):
                 api_request("POST", "/kehadiran/manual", json={"pertemuan_id": str(p["id"]), "siswa_id": sid, "status_hadir": "SAKIT"})
                 st.rerun()
-            if b4.button("A", key=f"A_{sid}_{p['id']}", help="Alpa", disabled=disabled, use_container_width=True):
+            if b4.button("A", key=f"A_{sid}_{p['id']}", help="Alpa", use_container_width=True):
                 api_request("POST", "/kehadiran/manual", json={"pertemuan_id": str(p["id"]), "siswa_id": sid, "status_hadir": "ALPA"})
                 st.rerun()
 
