@@ -144,6 +144,66 @@ async def update_pertemuan(
     return pertemuan
 
 
+async def get_or_create_today_pertemuan(
+    db: AsyncSession, kelas_id: uuid.UUID, created_by: uuid.UUID, jenis_pertemuan: JenisPertemuanEnum = JenisPertemuanEnum.OFFLINE, waktu_selesai: time | None = None
+) -> Pertemuan:
+    today = date.today()
+    result = await db.execute(
+        select(Pertemuan).where(
+            Pertemuan.kelas_id == kelas_id,
+            Pertemuan.tanggal_pertemuan == today,
+        )
+    )
+    existing = result.scalar_one_or_none()
+    if existing:
+        existing.jenis_pertemuan = jenis_pertemuan
+        if waktu_selesai:
+            existing.waktu_selesai_aktual = waktu_selesai
+        if existing.token_expires_at and existing.token_expires_at < datetime.now(timezone.utc):
+            existing.token_presensi = _generate_token()
+            existing.token_expires_at = datetime.now(timezone.utc) + timedelta(minutes=2)
+        await db.commit()
+        await db.refresh(existing)
+        return existing
+
+    result = await db.execute(
+        select(Kelas).where(Kelas.id == kelas_id).options(
+            selectinload(Kelas.jadwal_kelas),
+        )
+    )
+    kelas = result.scalar_one_or_none()
+    if not kelas:
+        raise NotFound("Kelas tidak ditemukan")
+
+    weekday = today.weekday()
+    jadwal = next((j for j in kelas.jadwal_kelas if _HARI_MAP[j.hari] == weekday), None)
+    if not jadwal:
+        raise NotFound("Tidak ada jadwal untuk hari ini")
+
+    token = _generate_token()
+    expires_at = datetime(
+        today.year, today.month, today.day,
+        jadwal.waktu_mulai.hour, jadwal.waktu_mulai.minute,
+        tzinfo=timezone.utc,
+    ) + timedelta(minutes=2)
+
+    pertemuan = Pertemuan(
+        kelas_id=kelas_id,
+        tanggal_pertemuan=today,
+        waktu_mulai_aktual=jadwal.waktu_mulai,
+        waktu_selesai_aktual=waktu_selesai if waktu_selesai else jadwal.waktu_selesai,
+        deskripsi=f"Quick session - {today.isoformat()}",
+        jenis_pertemuan=jenis_pertemuan,
+        token_presensi=token,
+        token_expires_at=expires_at,
+        created_by=created_by,
+    )
+    db.add(pertemuan)
+    await db.commit()
+    await db.refresh(pertemuan)
+    return pertemuan
+
+
 async def delete_pertemuan(
     db: AsyncSession, pertemuan_id: uuid.UUID
 ) -> None:
