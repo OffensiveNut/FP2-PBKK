@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_db, require_admin
+from app.api.deps import get_current_user, get_db, require_admin, require_guru_or_admin
 from app.core.exceptions import NotFound
 from app.models.jadwal_kelas import JadwalKelas
 from app.models.kelas import Kelas
@@ -41,7 +41,7 @@ async def list_kelas(
     skip: int = 0,
     limit: int = 100,
     db: AsyncSession = Depends(get_db),
-    _: User = Depends(require_admin),
+    _: User = Depends(get_current_user),
 ) -> list[KelasResponse]:
     kelas_list = await get_kelas_list(db, skip=skip, limit=limit)
     return [KelasResponse.model_validate(k) for k in kelas_list]
@@ -61,7 +61,7 @@ async def create_kelas_endpoint(
 async def get_kelas(
     kelas_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    _: User = Depends(require_admin),
+    _: User = Depends(get_current_user),
 ) -> KelasResponse:
     kelas = await get_kelas_by_id(db, kelas_id)
     if not kelas:
@@ -137,7 +137,7 @@ async def remove_siswa(
 async def list_jadwal_kelas(
     kelas_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    _: User = Depends(require_admin),
+    _: User = Depends(get_current_user),
 ) -> list[JadwalKelasResponse]:
     result = await db.execute(
         select(JadwalKelas).where(JadwalKelas.kelas_id == kelas_id)
